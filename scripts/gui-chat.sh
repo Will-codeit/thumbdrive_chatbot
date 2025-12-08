@@ -23,11 +23,11 @@ if ! lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
         end tell
 APPLESCRIPT
     
-    # Wait for server to start
+    # Wait for server to start listening on port
     echo "Waiting for server to start..."
     for i in {1..30}; do
         if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
-            echo "Server is ready!"
+            echo "Server is listening on port $PORT"
             break
         fi
         sleep 1
@@ -38,6 +38,23 @@ APPLESCRIPT
         exit 1
     fi
 fi
+
+# Wait for server to be fully ready (model loaded and accepting requests)
+echo "Waiting for model to load (this may take 30-60 seconds)..."
+for i in {1..60}; do
+    if curl -s -X GET "http://localhost:$PORT/health" >/dev/null 2>&1; then
+        echo "✅ Server is fully ready!"
+        break
+    fi
+    if [ $i -eq 60 ]; then
+        echo "⚠️  Server is taking longer than expected to load."
+        echo "   Opening chat interface anyway..."
+    fi
+    sleep 1
+    if [ $((i % 10)) -eq 0 ]; then
+        echo "   Still loading... ($i seconds elapsed)"
+    fi
+done
 
 # Create a temporary HTML chat interface
 CHAT_HTML="/tmp/deepseek_chat.html"
