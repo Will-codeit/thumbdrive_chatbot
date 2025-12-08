@@ -38,6 +38,32 @@ show_progress() {
     osascript -e "display notification \"$message\" with title \"DeepSeek-V3 Setup\""
 }
 
+# Function to show quick start dialog (when model is already present)
+show_quick_start_dialog() {
+    local model_name="$1"
+    local model_size="$2"
+    
+    local result=$(osascript << EOF
+tell application "System Events"
+    activate
+    set dialogText to "🚀 DeepSeek-V2-Lite Ready!
+
+✅ Model found: ${model_name}
+📦 Size: ${model_size}
+
+Your AI chatbot is ready to use with the pre-configured model.
+
+Would you like to:"
+    
+    set userChoice to button returned of (display dialog dialogText buttons {"Configure Settings", "Start Now!"} default button "Start Now!" with title "DeepSeek-V2-Lite")
+    return userChoice
+end tell
+EOF
+)
+    
+    echo "$result"
+}
+
 # Function to show configuration dialog
 show_config_dialog() {
     local ram=$1
@@ -296,17 +322,76 @@ EOF
     echo "CONFIGURED"
 }
 
-# Load existing configuration if available
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
-fi
-
 # Check system requirements
 echo "Checking system requirements..."
 
 OS_VERSION=$(sw_vers -productVersion)
 TOTAL_RAM=$(sysctl hw.memsize | awk '{print int($2/1024/1024/1024)}')
 FREE_SPACE=$(df -g "$SCRIPT_DIR" | awk 'NR==2 {print $4}')
+
+# Check for pre-downloaded models first
+PREDOWNLOADED_MODEL=""
+PREDOWNLOADED_SIZE=""
+
+# Check for any existing model files
+for model_file in models/deepseek-*.gguf; do
+    if [ -f "$model_file" ]; then
+        PREDOWNLOADED_MODEL=$(basename "$model_file")
+        # Get file size in GB
+        FILE_SIZE=$(du -h "$model_file" | awk '{print $1}')
+        PREDOWNLOADED_SIZE="$FILE_SIZE"
+        
+        # Extract model type from filename (e.g., Q3_K_M from deepseek-v2-lite-Q3_K_M.gguf)
+        MODEL_TYPE=$(echo "$PREDOWNLOADED_MODEL" | sed 's/deepseek-v2-lite-//' | sed 's/.gguf//')
+        
+        # If no config exists, create a default one for the pre-downloaded model
+        if [ ! -f "$CONFIG_FILE" ]; then
+            cat > "$CONFIG_FILE" << CONF
+VERSION=v2-lite
+MODEL=$MODEL_TYPE
+CONTEXT=4096
+GPU_LAYERS=33
+PORT=8080
+THREADS=8
+PARALLEL=2
+CONF
+        fi
+        
+        break
+    fi
+done
+
+# Load existing configuration if available
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
+# Check if llama.cpp needs to be built
+if [ ! -d "technical/llama.cpp/build" ]; then
+    show_progress "Building llama.cpp..."
+    
+    # Show progress in Terminal app
+    osascript <<-APPLESCRIPT
+        tell application "Terminal"
+            activate
+            do script "cd '$SCRIPT_DIR' && echo '🔧 Setting up DeepSeek...' && echo '' && ./scripts/setup.sh && echo '' && echo '✅ Setup complete! Restarting launcher...' && sleep 2 && ./START_DEEPSEEK.command"
+        end tell
+APPLESCRIPT
+    exit 0
+fi
+
+# If model is pre-downloaded and llama.cpp is built, show quick start option
+if [ ! -z "$PREDOWNLOADED_MODEL" ] && [ -d "technical/llama.cpp/build" ]; then
+    QUICK_START=$(show_quick_start_dialog "$PREDOWNLOADED_MODEL" "$PREDOWNLOADED_SIZE")
+    
+    if [[ "$QUICK_START" == "Start Now!" ]]; then
+        # Launch immediately with pre-configured settings
+        show_progress "Starting DeepSeek-V2-Lite..."
+        ./scripts/gui-chat.sh
+        exit 0
+    fi
+    # If user chose "Configure Settings", continue to configuration dialog below
+fi
 
 # Show system info and configuration dialog
 CONFIG_CHOICE=$(show_config_dialog $TOTAL_RAM)
@@ -376,7 +461,7 @@ fi
 
 # Load version from config, default to v2-lite
 VERSION=${VERSION:-v2-lite}
-MODEL=${MODEL:-Q4_K_M}
+MODEL=${MODEL:-Q3_K_M}
 
 # Check if model exists (use configured model and version)
 MODEL_PATH="models/deepseek-${VERSION}-${MODEL}.gguf"
