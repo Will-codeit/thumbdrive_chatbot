@@ -444,6 +444,11 @@ PORT=$PORT
 THREADS=$THREADS
 PARALLEL=$PARALLEL
 CONF
+
+    # Show memory safety warning for tight configurations
+    if [ $TOTAL_RAM -le 8 ] && [[ "$MODEL" != "Q2_K" ]]; then
+        osascript -e 'display dialog "⚠️  Memory Warning\n\nYour system has 8GB RAM. For best stability, we recommend using the Q2_K model.\n\nThe selected model may cause:\n• Slow performance\n• System freezing\n• Potential crashes\n\nYou can switch models anytime using SWITCH_MODEL.command" with title "DeepSeek Memory Warning" buttons {"OK"} default button "OK" with icon caution'
+    fi
 fi
 
 # Check if llama.cpp exists

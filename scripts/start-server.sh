@@ -6,6 +6,15 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 cd "$SCRIPT_DIR"
 
+# Run memory safety check first
+echo "🔍 Running memory safety check..."
+if ! ./scripts/check-memory.sh; then
+    echo ""
+    echo "❌ Server startup cancelled due to memory safety concerns."
+    echo ""
+    exit 1
+fi
+
 # Load user configuration if exists
 CONFIG_FILE="$SCRIPT_DIR/.config"
 if [ -f "$CONFIG_FILE" ]; then
@@ -114,9 +123,23 @@ echo "🎮 GPU Layers: $GPU_LAYERS"
 echo "🧵 CPU Threads: $THREADS"
 echo ""
 
+# Create a crash log directory
+mkdir -p logs
+
+# Set memory limits for the process
+MEMORY_LIMIT=$((CONTEXT_SIZE * 2 / 1024))  # Rough estimate in MB
+
 cd technical/llama.cpp
 
-# Start server with optimized settings
+# Trap signals for graceful shutdown
+trap 'echo ""; echo "⚠️  Received shutdown signal. Stopping server..."; kill $SERVER_PID 2>/dev/null; exit 0' INT TERM
+
+# Start server with optimized settings and memory monitoring
+echo "💡 Starting with memory-safe settings..."
+echo "   (Server will auto-shutdown if memory pressure becomes critical)"
+echo ""
+
+# Start the server in background to monitor it
 ./build/bin/llama-server \
     -m "../../$MODEL_PATH" \
     -c $CONTEXT_SIZE \
@@ -126,5 +149,52 @@ cd technical/llama.cpp
     --port $PORT \
     --threads $THREADS \
     --parallel $PARALLEL \
-    --mlock
+    --mlock 2>&1 | tee "../../logs/server_$(date +%Y%m%d_%H%M%S).log" &
+
+SERVER_PID=$!
+
+# Monitor memory pressure in background
+(
+    sleep 30  # Wait for model to load
+    while kill -0 $SERVER_PID 2>/dev/null; do
+        # Check memory pressure every 30 seconds
+        MEM_FREE=$(memory_pressure 2>/dev/null | grep "System-wide memory free percentage:" | awk '{print $5}' | tr -d '%')
+        
+        if [ ! -z "$MEM_FREE" ] && [ "$MEM_FREE" -lt 5 ]; then
+            echo ""
+            echo "⚠️  CRITICAL: Memory pressure detected (${MEM_FREE}% free)"
+            echo "   Stopping server to prevent system crash..."
+            echo ""
+            kill $SERVER_PID 2>/dev/null
+            exit 1
+        fi
+        
+        sleep 30
+    done
+) &
+
+MONITOR_PID=$!
+
+# Wait for server process
+wait $SERVER_PID
+EXIT_CODE=$?
+
+# Kill monitor process
+kill $MONITOR_PID 2>/dev/null
+
+# Check exit code
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ Server stopped with error code: $EXIT_CODE"
+    echo ""
+    echo "Check the logs in: logs/"
+    echo ""
+    echo "Common causes:"
+    echo "  • Out of memory - try a smaller model (./SWITCH_MODEL.command)"
+    echo "  • Model file corrupted - re-download the model"
+    echo "  • Port already in use - close other applications"
+    echo ""
+fi
+
+exit $EXIT_CODE
 

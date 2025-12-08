@@ -5,9 +5,9 @@ models/*.gguf
 # Ignore user configuration
 .config
 
-# Ignore logs
-logs/
-*.log
+# Ignore logs but keep the directory
+logs/*.log
+logs/server_*.log
 
 # Ignore technical folder (llama.cpp - downloaded during setup)
 technical/
