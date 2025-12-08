@@ -11,7 +11,7 @@ echo "════════════════════════�
 echo ""
 
 # GitHub repository URL
-GITHUB_REPO="https://github.com/will-codeit/thumbdrive_chatbot.git"
+GITHUB_REPO="https://github.com/Will-codeit/thumbdrive_chatbot.git"
 
 # Get the parent directory (deep_seek_llama root)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
