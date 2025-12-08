@@ -10,15 +10,15 @@ echo "  🔄 DeepSeek-V2-Lite Update"
 echo "════════════════════════════════════════════════════════"
 echo ""
 
+# GitHub repository URL
+GITHUB_REPO="https://github.com/will-codeit/deep_seek_llama.git"
+
 # Get the parent directory (deep_seek_llama root)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 cd "$SCRIPT_DIR"
 
-# Your GitHub repository URL
-GITHUB_REPO="https://github.com/YOUR_USERNAME/deep_seek_llama.git"
-UPDATE_DIR="/tmp/deep_seek_llama_update_$$"
-
-echo "📦 Checking for updates..."
+echo "📍 Current location: $SCRIPT_DIR"
+echo "📦 Repository: $GITHUB_REPO"
 echo ""
 
 # Backup user files before updating
