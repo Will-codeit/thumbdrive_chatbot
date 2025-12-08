@@ -1,83 +1,82 @@
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║        🚀 DeepSeek-V3 - LOCAL AI ON YOUR MAC               ║
-║        Double-Click to Start!                              ║
+║        🚀 DeepSeek LOCAL AI - JUST DOUBLE-CLICK!           ║
 ║                                                            ║
 ╚════════════════════════════════════════════════════════════╝
 
-👋 WELCOME! GET STARTED IN 10 SECONDS:
+👋 GET STARTED IN 3 SECONDS:
 
-TWO WAYS TO START:
+   👆 DOUBLE-CLICK: "START_DEEPSEEK.command"
 
-Option 1 (RECOMMENDED): Double-click "START_DEEPSEEK.command"
-   ✅ Works on thumb drives without any setup
-   ✅ No security warnings
-   ✅ Just double-click and go!
-
-Option 2: Double-click "🚀 Start DeepSeek.app"
-   ✅ Nice icon, looks professional
-   ⚠️  Requires one-time security approval (see below)
-
-The launcher will:
-✅ Check your system automatically
-✅ Guide you through any needed setup
-✅ Download the AI model (first time only, ~30-60 min)
-✅ Start the AI server
-✅ Open the chat interface
+That's it! Everything else is automatic.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+✨ WHAT HAPPENS NEXT:
 
-⚠️  FIRST TIME SECURITY WARNING (App Bundle Only):
+1️⃣  System checks your Mac (takes 5 seconds)
+2️⃣  Downloads AI model if needed (first time: 15-30 minutes)
+3️⃣  Starts the AI server (takes 30-60 seconds)
+4️⃣  Opens chat window in your browser
+5️⃣  You're chatting with AI! 🎉
 
-If using "🚀 Start DeepSeek.app", macOS will show a security warning
-the first time you run it (especially on thumb drives).
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-HOW TO FIX (only needed once per Mac):
-1. Right-click (or Control+click) on "🚀 Start DeepSeek.app"
+⚠️  FIRST TIME ON A NEW MAC?
+
+macOS might block the script with a security warning.
+
+FIX IN 10 SECONDS:
+1. Right-click (or Control+click) on "START_DEEPSEEK.command"
 2. Select "Open" from the menu
-3. Click "Open" in the dialog that appears
-4. The app will now run!
-
-After this, you can just double-click normally.
-
-💡 TIP: Using "START_DEEPSEEK.command" avoids this issue entirely!
-
+3. Click "Open" in the dialog
+4. Done! Now it works forever on this Mac.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+📋 WHAT YOU NEED:
 
-📋 SYSTEM REQUIREMENTS:
+✅ Mac with 8GB RAM (16GB+ is better)
+✅ macOS 10.15 or newer
+✅ Internet (first time only - for downloading AI)
+✅ 20GB free space on this drive
 
-✓ macOS 10.15 or later
-✓ 8GB RAM minimum (16GB+ recommended)
-✓ Internet connection (first time only)
-✓ 50GB+ free space on this drive
-
-💡 The model file is ~40GB but only 8-12GB loads into RAM!
-
+💡 After first setup, works 100% OFFLINE!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+❓ TROUBLESHOOTING:
 
-❓ NEED HELP?
+Problem: "Permission denied" error
+Fix: Right-click START_DEEPSEEK.command → Open
 
-• Read "getstarted.md" for detailed instructions
-• Read "docs/readme.md" for technical documentation
-• Check "docs/MEMORY_EXPLAINED.md" to understand how it works
+Problem: Computer is slow or freezing
+Fix: Close other apps (Chrome, etc.) to free RAM
 
+Problem: Download keeps failing
+Fix: Check internet connection and try again
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-
-🔒 PRIVACY & SECURITY:
-
-✅ 100% runs on YOUR Mac
-✅ No data sent to the cloud
-✅ Works completely offline (after initial setup)
-✅ Your conversations never leave your computer
-
+Problem: Port 8080 already in use
+Fix: Close other servers/apps using that port
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Enjoy your private, powerful AI assistant! 🤖✨
+🔒 YOUR PRIVACY IS PROTECTED:
+
+✅ Runs 100% on YOUR Mac
+✅ No data sent to internet
+✅ Works completely offline (after first download)
+✅ Your conversations stay on your computer
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 NEED MORE HELP?
+
+Read "getstarted.md" for detailed guide
+Read "docs/readme.md" for full documentation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👆 READY? DOUBLE-CLICK: "START_DEEPSEEK.command"
+
+Enjoy your private AI assistant! 🤖✨
