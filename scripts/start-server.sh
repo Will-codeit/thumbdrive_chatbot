@@ -32,15 +32,15 @@ else
 
     # Auto-select model and settings based on RAM
     if [ $TOTAL_RAM -le 8 ]; then
-        MODEL_NAME="Q3_K_M"
+        MODEL_NAME="Q2_K"
         CONTEXT_SIZE=2048
         GPU_LAYERS=20
         BATCH_SIZE=256
         echo "⚙️  8GB RAM detected - using optimized settings"
-        echo "   Model: Q3_K_M (smaller, faster)"
+        echo "   Model: Q2_K (smaller, good quality)"
         echo "   Context: 2048 tokens"
     elif [ $TOTAL_RAM -le 16 ]; then
-        MODEL_NAME="Q4_K_M"
+        MODEL_NAME="Q3_K_M"
         CONTEXT_SIZE=4096
         GPU_LAYERS=33
         BATCH_SIZE=512
@@ -52,7 +52,7 @@ else
         BATCH_SIZE=512
         echo "⚙️  32GB RAM detected - using high-quality settings"
     else
-        MODEL_NAME="Q4_K_M"
+        MODEL_NAME="Q5_K_M"
         CONTEXT_SIZE=16384
         GPU_LAYERS=99
         BATCH_SIZE=512

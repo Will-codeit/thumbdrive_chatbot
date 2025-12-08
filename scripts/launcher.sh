@@ -70,25 +70,25 @@ show_config_dialog() {
     
     # Determine recommended settings based on RAM for V2-Lite
     if [ $ram -le 8 ]; then
-        DEFAULT_MODEL="Q3_K_M"
+        DEFAULT_MODEL="Q2_K"
         DEFAULT_CONTEXT="2048"
         DEFAULT_GPU_LAYERS="20"
-        MODEL_SIZE="~7GB"
+        MODEL_SIZE="~5.4GB"
     elif [ $ram -le 16 ]; then
-        DEFAULT_MODEL="Q4_K_M"
+        DEFAULT_MODEL="Q3_K_M"
         DEFAULT_CONTEXT="4096"
         DEFAULT_GPU_LAYERS="33"
-        MODEL_SIZE="~9GB"
+        MODEL_SIZE="~7.6GB"
     elif [ $ram -le 32 ]; then
-        DEFAULT_MODEL="Q5_K_M"
+        DEFAULT_MODEL="Q4_K_M"
         DEFAULT_CONTEXT="8192"
         DEFAULT_GPU_LAYERS="99"
-        MODEL_SIZE="~11GB"
+        MODEL_SIZE="~9GB"
     else
-        DEFAULT_MODEL="Q6_K"
+        DEFAULT_MODEL="Q5_K_M"
         DEFAULT_CONTEXT="16384"
         DEFAULT_GPU_LAYERS="99"
-        MODEL_SIZE="~13GB"
+        MODEL_SIZE="~11GB"
     fi
     
     # Build configuration dialog using AppleScript
@@ -107,13 +107,14 @@ Configure your AI settings below:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📦 MODEL QUALITY (Choose one):
-1️⃣  Q3_K_M (~7GB)  - Fast, good quality (8GB RAM)
-2️⃣  Q4_K_M (~9GB)  - Balanced (16GB RAM) ⭐️ Default
-3️⃣  Q5_K_M (~11GB) - High quality (32GB RAM)
-4️⃣  Q6_K   (~13GB) - Near-perfect (64GB+ RAM)
+1️⃣  Q2_K   (~5.4GB) - Good quality (8GB RAM) ⭐️ Best for 8GB
+2️⃣  Q3_K_M (~7.6GB) - Very good (16GB RAM) ⭐️ Default
+3️⃣  Q4_K_M (~9GB)   - High quality (24GB RAM)
+4️⃣  Q5_K_M (~11GB)  - Very high (32GB+ RAM)
+5️⃣  Q6_K   (~13GB)  - Near-perfect (64GB+ RAM)
 
 💾 CONTEXT WINDOW (tokens for conversation memory):
-• 2048 - Short conversations (fast)
+• 2048 - Short conversations (fast, 8GB RAM)
 • 4096 - Standard conversations ⭐️ Default
 • 8192 - Long conversations (more RAM)
 • 16384 - Very long documents (lots of RAM)
@@ -413,19 +414,19 @@ elif [[ "$CONFIG_CHOICE" == "Use Recommended" ]]; then
     # Use automatic defaults based on RAM for V2-Lite
     VERSION="v2-lite"
     if [ $TOTAL_RAM -le 8 ]; then
-        MODEL="Q3_K_M"
+        MODEL="Q2_K"
         CONTEXT=2048
         GPU_LAYERS=20
     elif [ $TOTAL_RAM -le 16 ]; then
-        MODEL="Q4_K_M"
+        MODEL="Q3_K_M"
         CONTEXT=4096
         GPU_LAYERS=33
     elif [ $TOTAL_RAM -le 32 ]; then
-        MODEL="Q5_K_M"
+        MODEL="Q4_K_M"
         CONTEXT=8192
         GPU_LAYERS=99
     else
-        MODEL="Q6_K"
+        MODEL="Q5_K_M"
         CONTEXT=16384
         GPU_LAYERS=99
     fi
@@ -468,11 +469,12 @@ MODEL_PATH="models/deepseek-${VERSION}-${MODEL}.gguf"
 if [ ! -f "$MODEL_PATH" ]; then
     # Get model size for display - V2-Lite only
     case $MODEL in
-        Q3_K_M) MODEL_SIZE="~7GB" ;;
+        Q2_K) MODEL_SIZE="~5.4GB" ;;
+        Q3_K_M) MODEL_SIZE="~7.6GB" ;;
         Q4_K_M) MODEL_SIZE="~9GB" ;;
         Q5_K_M) MODEL_SIZE="~11GB" ;;
         Q6_K) MODEL_SIZE="~13GB" ;;
-        *) MODEL_SIZE="~9GB" ;;
+        *) MODEL_SIZE="~7.6GB" ;;
     esac
     
     if ask_yes_no "Download Model" "Ready to download AI model:\n\nModel: DeepSeek-V2-Lite ${MODEL}\nSize: ${MODEL_SIZE}\nTime: 10-30 minutes\n\nDownload now?"; then

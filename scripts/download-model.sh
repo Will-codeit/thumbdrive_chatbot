@@ -30,31 +30,38 @@ else
 
     # Determine recommended quantization based on RAM
     if [ $TOTAL_RAM -le 8 ]; then
-        RECOMMENDED_MODEL="Q3_K_M"
-        MODEL_SIZE="~7GB"
-        echo "📌 Recommended for your system: Q3_K_M quantization"
+        RECOMMENDED_MODEL="Q2_K"
+        MODEL_SIZE="~5.4GB"
+        echo "📌 Recommended for your system: Q2_K quantization"
         echo "   Size: ${MODEL_SIZE}"
         echo "   Quality: Good (optimized for 8GB RAM)"
     elif [ $TOTAL_RAM -le 16 ]; then
+        RECOMMENDED_MODEL="Q3_K_M"
+        MODEL_SIZE="~7.6GB"
+        echo "📌 Recommended for your system: Q3_K_M quantization"
+        echo "   Size: ${MODEL_SIZE}"
+        echo "   Quality: Very Good (balanced)"
+    elif [ $TOTAL_RAM -le 32 ]; then
         RECOMMENDED_MODEL="Q4_K_M"
         MODEL_SIZE="~9GB"
         echo "📌 Recommended for your system: Q4_K_M quantization"
         echo "   Size: ${MODEL_SIZE}"
-        echo "   Quality: Balanced (standard)"
+        echo "   Quality: High (standard)"
     else
         RECOMMENDED_MODEL="Q5_K_M"
         MODEL_SIZE="~11GB"
         echo "📌 Recommended for your system: Q5_K_M quantization"
         echo "   Size: ${MODEL_SIZE}"
-        echo "   Quality: High"
+        echo "   Quality: Very High"
     fi
     
     echo ""
     echo "Available quantizations for DeepSeek-V2-Lite:"
-    echo "  Q3_K_M (~7GB)  - Best for 8GB RAM"
-    echo "  Q4_K_M (~9GB)  - Best for 16GB RAM (default)"
-    echo "  Q5_K_M (~11GB) - Best for 32GB+ RAM"
-    echo "  Q6_K   (~13GB) - Best for 64GB+ RAM"
+    echo "  Q2_K   (~5.4GB) - Best for 8GB RAM (smaller, good quality)"
+    echo "  Q3_K_M (~7.6GB) - Best for 16GB RAM (balanced)"
+    echo "  Q4_K_M (~9GB)   - Best for 24GB RAM (high quality)"
+    echo "  Q5_K_M (~11GB)  - Best for 32GB+ RAM (very high quality)"
+    echo "  Q6_K   (~13GB)  - Best for 64GB+ RAM (near-perfect)"
 
     echo ""
     read -p "Download ${RECOMMENDED_MODEL} (recommended)? [Y/n]: " -n 1 -r
@@ -64,17 +71,20 @@ else
     else
         echo ""
         echo "Choose model size:"
-        echo "1) Q3_K_M - For 8GB RAM"
-        echo "2) Q4_K_M - For 16GB RAM (default)"
-        echo "3) Q5_K_M - For 32GB+ RAM"
-        echo "4) Q6_K   - For 64GB+ RAM"
-        read -p "Enter choice [1-4]: " -n 1 -r
+        echo "1) Q2_K   - For 8GB RAM (~5.4GB)"
+        echo "2) Q3_K_M - For 16GB RAM (~7.6GB)"
+        echo "3) Q4_K_M - For 24GB RAM (~9GB)"
+        echo "4) Q5_K_M - For 32GB RAM (~11GB)"
+        echo "5) Q6_K   - For 64GB+ RAM (~13GB)"
+        read -p "Enter choice [1-5]: " -n 1 -r
         echo
         case $REPLY in
-            1) QUANT="Q3_K_M" ;;
-            3) QUANT="Q5_K_M" ;;
-            4) QUANT="Q6_K" ;;
-            *) QUANT="Q4_K_M" ;;
+            1) QUANT="Q2_K" ;;
+            2) QUANT="Q3_K_M" ;;
+            3) QUANT="Q4_K_M" ;;
+            4) QUANT="Q5_K_M" ;;
+            5) QUANT="Q6_K" ;;
+            *) QUANT="$RECOMMENDED_MODEL" ;;
         esac
     fi
 fi
