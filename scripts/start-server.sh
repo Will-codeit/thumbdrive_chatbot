@@ -14,7 +14,7 @@ if [ -f "$CONFIG_FILE" ]; then
     
     # Use configured values
     MODEL_NAME=${MODEL:-"Q4_K_M"}
-    MODEL_VERSION=${MODEL_VERSION:-"v2-lite"}
+    MODEL_VERSION=${VERSION:-"v2-lite"}
     CONTEXT_SIZE=${CONTEXT:-4096}
     GPU_LAYERS=${GPU_LAYERS:-33}
     PORT=${PORT:-8080}
@@ -67,15 +67,15 @@ fi
 
 # Try to find available model (check v2-lite, v2, and v3)
 MODEL_PATH=""
-if [ -f "models/DeepSeek-V2-Lite.${MODEL_NAME}.gguf" ]; then
+if [ -f "models/deepseek-v2-lite-${MODEL_NAME}.gguf" ]; then
+    MODEL_PATH="models/deepseek-v2-lite-${MODEL_NAME}.gguf"
+    MODEL_VERSION="v2-lite"
+elif [ -f "models/DeepSeek-V2-Lite.${MODEL_NAME}.gguf" ]; then
     MODEL_PATH="models/DeepSeek-V2-Lite.${MODEL_NAME}.gguf"
     MODEL_VERSION="v2-lite"
-elif [ -f "models/deepseek-${MODEL_VERSION}-${MODEL_NAME}.gguf" ]; then
-    MODEL_PATH="models/deepseek-${MODEL_VERSION}-${MODEL_NAME}.gguf"
 elif [ -f "models/deepseek-v2-${MODEL_NAME}.gguf" ]; then
     MODEL_PATH="models/deepseek-v2-${MODEL_NAME}.gguf"
     MODEL_VERSION="v2"
-    echo "ℹ️  Using DeepSeek-V2"
 elif [ -f "models/deepseek-v3-${MODEL_NAME}.gguf" ]; then
     MODEL_PATH="models/deepseek-v3-${MODEL_NAME}.gguf"
     MODEL_VERSION="v3"
@@ -85,7 +85,7 @@ HOST="0.0.0.0"
 BATCH_SIZE=${BATCH_SIZE:-512}
 
 # Check if llama.cpp exists
-if [ ! -d "llama.cpp" ]; then
+if [ ! -d "technical/llama.cpp" ]; then
     echo "❌ llama.cpp not found. Please run scripts/setup.sh first."
     exit 1
 fi
@@ -94,7 +94,7 @@ fi
 if [ -z "$MODEL_PATH" ] || [ ! -f "$MODEL_PATH" ]; then
     echo "❌ Model not found"
     echo ""
-    echo "Looking for: DeepSeek-V2-Lite.${MODEL_NAME}.gguf or deepseek-${MODEL_VERSION}-${MODEL_NAME}.gguf"
+    echo "Looking for: deepseek-${MODEL_VERSION}-${MODEL_NAME}.gguf"
     echo ""
     echo "Available models in models/ folder:"
     ls -lh models/*.gguf 2>/dev/null || echo "  (none found)"
@@ -103,7 +103,10 @@ if [ -z "$MODEL_PATH" ] || [ ! -f "$MODEL_PATH" ]; then
     exit 1
 fi
 
-echo "🚀 Starting DeepSeek-${MODEL_VERSION^^} Server..."
+# Convert version to uppercase for display (bash 3.2 compatible)
+MODEL_VERSION_UPPER=$(echo "$MODEL_VERSION" | tr '[:lower:]' '[:upper:]')
+
+echo "🚀 Starting DeepSeek-${MODEL_VERSION_UPPER} Server..."
 echo "📊 Model: $MODEL_PATH"
 echo "🌐 Server: http://localhost:$PORT"
 echo "💾 Context: $CONTEXT_SIZE tokens"
@@ -111,11 +114,11 @@ echo "🎮 GPU Layers: $GPU_LAYERS"
 echo "🧵 CPU Threads: $THREADS"
 echo ""
 
-cd llama.cpp
+cd technical/llama.cpp
 
 # Start server with optimized settings
 ./build/bin/llama-server \
-    -m "../$MODEL_PATH" \
+    -m "../../$MODEL_PATH" \
     -c $CONTEXT_SIZE \
     -b $BATCH_SIZE \
     -ngl $GPU_LAYERS \
