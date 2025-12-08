@@ -1,0 +1,83 @@
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║        🚀 DeepSeek-V3 - LOCAL AI ON YOUR MAC               ║
+║        Double-Click to Start!                              ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+
+👋 WELCOME! GET STARTED IN 10 SECONDS:
+
+TWO WAYS TO START:
+
+Option 1 (RECOMMENDED): Double-click "START_DEEPSEEK.command"
+   ✅ Works on thumb drives without any setup
+   ✅ No security warnings
+   ✅ Just double-click and go!
+
+Option 2: Double-click "🚀 Start DeepSeek.app"
+   ✅ Nice icon, looks professional
+   ⚠️  Requires one-time security approval (see below)
+
+The launcher will:
+✅ Check your system automatically
+✅ Guide you through any needed setup
+✅ Download the AI model (first time only, ~30-60 min)
+✅ Start the AI server
+✅ Open the chat interface
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+⚠️  FIRST TIME SECURITY WARNING (App Bundle Only):
+
+If using "🚀 Start DeepSeek.app", macOS will show a security warning
+the first time you run it (especially on thumb drives).
+
+HOW TO FIX (only needed once per Mac):
+1. Right-click (or Control+click) on "🚀 Start DeepSeek.app"
+2. Select "Open" from the menu
+3. Click "Open" in the dialog that appears
+4. The app will now run!
+
+After this, you can just double-click normally.
+
+💡 TIP: Using "START_DEEPSEEK.command" avoids this issue entirely!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📋 SYSTEM REQUIREMENTS:
+
+✓ macOS 10.15 or later
+✓ 8GB RAM minimum (16GB+ recommended)
+✓ Internet connection (first time only)
+✓ 50GB+ free space on this drive
+
+💡 The model file is ~40GB but only 8-12GB loads into RAM!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+❓ NEED HELP?
+
+• Read "getstarted.md" for detailed instructions
+• Read "docs/readme.md" for technical documentation
+• Check "docs/MEMORY_EXPLAINED.md" to understand how it works
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔒 PRIVACY & SECURITY:
+
+✅ 100% runs on YOUR Mac
+✅ No data sent to the cloud
+✅ Works completely offline (after initial setup)
+✅ Your conversations never leave your computer
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Enjoy your private, powerful AI assistant! 🤖✨

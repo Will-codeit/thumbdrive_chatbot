@@ -1,0 +1,27 @@
+# Ignore large binary files and downloads
+llama.cpp/
+models/
+*.gguf
+*.bin
+
+# Ignore logs
+logs/
+*.log
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Node
+node_modules/

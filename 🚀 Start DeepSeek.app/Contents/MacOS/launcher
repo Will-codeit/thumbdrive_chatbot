@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Get the directory where this app is located (thumb drive root)
+APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../../.. && pwd )"
+
+# Log file for debugging
+LOG_FILE="$APP_DIR/launcher.log"
+
+# Redirect all output to log file
+exec > "$LOG_FILE" 2>&1
+
+echo "=== DeepSeek Launcher Started at $(date) ==="
+echo "APP_DIR: $APP_DIR"
+
+cd "$APP_DIR" || {
+    osascript -e "display dialog \"Failed to change directory to: $APP_DIR\" with title \"Launcher Error\" buttons {\"OK\"} default button \"OK\" with icon stop"
+    exit 1
+}
+
+echo "Current directory: $(pwd)"
+
+# Check if launcher.sh exists
+if [ ! -f "scripts/launcher.sh" ]; then
+    osascript -e "display dialog \"Error: scripts/launcher.sh not found in $APP_DIR\" with title \"Launcher Error\" buttons {\"OK\"} default button \"OK\" with icon stop"
+    exit 1
+fi
+
+# Make it executable
+chmod +x scripts/launcher.sh
+
+echo "Running scripts/launcher.sh..."
+# Run the GUI launcher
+./scripts/launcher.sh
