@@ -1,12 +1,19 @@
 # Ignore large binary files and downloads
-llama.cpp/
-models/
-*.gguf
+models/*.gguf
 *.bin
+
+# Ignore user configuration
+.config
 
 # Ignore logs
 logs/
 *.log
+
+# Ignore technical folder (llama.cpp - downloaded during setup)
+technical/
+
+# Ignore build artifacts
+build/
 
 # macOS
 .DS_Store
