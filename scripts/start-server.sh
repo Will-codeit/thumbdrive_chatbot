@@ -1,10 +1,15 @@
 #!/bin/bash
 
 # DeepSeek Server Startup Script
+# Compatible with Intel (x86_64) and Apple Silicon (arm64) Macs
 
 # Get the parent directory (deep_seek_llama root)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 cd "$SCRIPT_DIR"
+
+# Detect system architecture
+ARCH=$(uname -m)
+OS_VERSION=$(sw_vers -productVersion)
 
 # Run memory safety check first
 echo "🔍 Running memory safety check..."
@@ -99,6 +104,32 @@ if [ ! -d "technical/llama.cpp" ]; then
     exit 1
 fi
 
+# Verify llama-server binary exists and is executable
+SERVER_BINARY="technical/llama.cpp/build/bin/llama-server"
+if [ ! -f "$SERVER_BINARY" ]; then
+    echo "❌ llama-server binary not found at: $SERVER_BINARY"
+    echo ""
+    echo "The build may be incomplete or corrupted."
+    echo "Try running: ./scripts/setup.sh"
+    exit 1
+fi
+
+# Check if binary is for the correct architecture
+if ! file "$SERVER_BINARY" 2>/dev/null | grep -q "$ARCH"; then
+    echo "⚠️  WARNING: llama-server binary may not match your architecture"
+    echo "   Your system: $ARCH"
+    echo "   Binary info:"
+    file "$SERVER_BINARY" 2>/dev/null || echo "   Unable to check binary architecture"
+    echo ""
+    echo "If you get 'bad CPU type' errors, rebuild with:"
+    echo "   rm -rf technical/llama.cpp/build"
+    echo "   ./scripts/setup.sh"
+    echo ""
+fi
+
+# Make binary executable
+chmod +x "$SERVER_BINARY" 2>/dev/null || true
+
 # Check if model exists
 if [ -z "$MODEL_PATH" ] || [ ! -f "$MODEL_PATH" ]; then
     echo "❌ Model not found"
@@ -116,11 +147,20 @@ fi
 MODEL_VERSION_UPPER=$(echo "$MODEL_VERSION" | tr '[:lower:]' '[:upper:]')
 
 echo "🚀 Starting DeepSeek-${MODEL_VERSION_UPPER} Server..."
+echo "🖥️  Architecture: $ARCH"
 echo "📊 Model: $MODEL_PATH"
 echo "🌐 Server: http://localhost:$PORT"
 echo "💾 Context: $CONTEXT_SIZE tokens"
-echo "🎮 GPU Layers: $GPU_LAYERS"
-echo "🧵 CPU Threads: $THREADS"
+
+# Architecture-specific settings
+if [[ "$ARCH" == "arm64" ]]; then
+    echo "🎮 GPU: Metal acceleration (${GPU_LAYERS} layers)"
+else
+    echo "🧵 CPU: ${THREADS} threads (Intel - no GPU acceleration)"
+    # For Intel Macs, don't use GPU layers
+    GPU_LAYERS=0
+fi
+
 echo ""
 
 # Create a crash log directory
@@ -139,19 +179,41 @@ echo "💡 Starting with memory-safe settings..."
 echo "   (Server will auto-shutdown if memory pressure becomes critical)"
 echo ""
 
-# Start the server in background to monitor it
-./build/bin/llama-server \
-    -m "../../$MODEL_PATH" \
+# Build command with architecture-specific options
+SERVER_CMD="./build/bin/llama-server \
+    -m \"../../$MODEL_PATH\" \
     -c $CONTEXT_SIZE \
     -b $BATCH_SIZE \
-    -ngl $GPU_LAYERS \
     --host $HOST \
     --port $PORT \
     --threads $THREADS \
-    --parallel $PARALLEL \
-    --mlock 2>&1 | tee "../../logs/server_$(date +%Y%m%d_%H%M%S).log" &
+    --parallel $PARALLEL"
+
+# Add GPU layers only for Apple Silicon
+if [[ "$ARCH" == "arm64" ]]; then
+    SERVER_CMD="$SERVER_CMD -ngl $GPU_LAYERS --mlock"
+fi
+
+# Start the server in background to monitor it
+eval $SERVER_CMD 2>&1 | tee "../../logs/server_$(date +%Y%m%d_%H%M%S).log" &
 
 SERVER_PID=$!
+
+# Check if server started successfully
+sleep 3
+if ! kill -0 $SERVER_PID 2>/dev/null; then
+    echo ""
+    echo "❌ Server failed to start"
+    echo ""
+    echo "Check the log file in logs/ for details."
+    echo ""
+    echo "Common issues:"
+    echo "  • Wrong architecture binary (run setup.sh to rebuild)"
+    echo "  • Corrupted model file (re-download model)"
+    echo "  • Port already in use (close other apps on port $PORT)"
+    echo "  • Insufficient memory (try smaller model)"
+    exit 1
+fi
 
 # Monitor memory pressure in background
 (
@@ -193,6 +255,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  • Out of memory - try a smaller model (./SWITCH_MODEL.command)"
     echo "  • Model file corrupted - re-download the model"
     echo "  • Port already in use - close other applications"
+    echo "  • Bad CPU type - rebuild for your architecture (./scripts/setup.sh)"
     echo ""
 fi
 

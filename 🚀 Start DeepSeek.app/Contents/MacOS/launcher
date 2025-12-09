@@ -26,8 +26,24 @@ if [ ! -f "scripts/launcher.sh" ]; then
 fi
 
 # Make it executable
-chmod +x scripts/launcher.sh
+chmod +x scripts/launcher.sh 2>/dev/null
 
 echo "Running scripts/launcher.sh..."
-# Run the GUI launcher
-./scripts/launcher.sh
+
+# Use bash explicitly to bypass macOS security restrictions
+/bin/bash "$APP_DIR/scripts/launcher.sh" 2>&1 || {
+    ERROR_CODE=$?
+    echo "ERROR: launcher.sh failed with exit code $ERROR_CODE"
+    
+    osascript -e "display dialog \"Failed to start DeepSeek launcher.
+
+Error: Scripts blocked by macOS security
+
+Solution:
+1. Right-click '🚀 Start DeepSeek.app'
+2. Select 'Open'
+3. Click 'Open' in the security dialog
+
+Or use: START_DEEPSEEK.command instead\" with title \"Security Error\" buttons {\"OK\"} default button \"OK\" with icon caution"
+    exit $ERROR_CODE
+}

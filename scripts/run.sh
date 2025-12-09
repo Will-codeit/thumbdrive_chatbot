@@ -2,6 +2,7 @@
 
 # Main launcher script for portable DeepSeek setup
 # This script checks requirements and starts the server
+# Compatible with Intel (x86_64) and Apple Silicon (arm64) Macs
 
 set -e
 
@@ -13,6 +14,40 @@ echo ""
 # Get the parent directory (deep_seek_llama root)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 cd "$SCRIPT_DIR"
+
+# Detect system information
+ARCH=$(uname -m)
+OS_VERSION=$(sw_vers -productVersion)
+OS_MAJOR=$(echo "$OS_VERSION" | cut -d. -f1)
+
+echo "🖥️  System Information:"
+echo "   Architecture: $ARCH"
+case "$ARCH" in
+    arm64)
+        echo "   Type: Apple Silicon (M1/M2/M3/M4)"
+        ;;
+    x86_64)
+        echo "   Type: Intel processor"
+        ;;
+    *)
+        echo "   Type: Unknown ($ARCH)"
+        echo ""
+        echo "⚠️  WARNING: Untested architecture"
+        echo "   DeepSeek may not work correctly on this system"
+        echo ""
+        ;;
+esac
+echo "   macOS: $OS_VERSION"
+echo ""
+
+# Validate macOS version
+if [ "$OS_MAJOR" -lt 10 ]; then
+    echo "❌ ERROR: macOS 10.9 or later required"
+    echo "   Your version: $OS_VERSION"
+    echo ""
+    read -p "Press Enter to exit..."
+    exit 1
+fi
 
 # Run pre-flight check
 if [ -f "scripts/pre-flight-check.sh" ]; then
@@ -29,10 +64,6 @@ fi
 # System checks
 echo "🔍 Running detailed system checks..."
 echo ""
-
-# Check macOS version
-OS_VERSION=$(sw_vers -productVersion)
-echo "✓ macOS version: $OS_VERSION"
 
 # Check available RAM
 TOTAL_RAM=$(sysctl hw.memsize | awk '{print int($2/1024/1024/1024)}')
@@ -93,7 +124,7 @@ if [ -z "$LLAMA_DIR" ]; then
     echo ""
     echo "This will:"
     echo "  • Download llama.cpp (AI engine)"
-    echo "  • Compile it for your Mac"
+    echo "  • Compile it for your Mac ($ARCH)"
     echo "  • Takes about 5-10 minutes"
     echo ""
     read -p "Start setup now? [Y/n]: " -n 1 -r
@@ -132,14 +163,59 @@ if [ ! -f "$SERVER_BIN" ]; then
     cd "$LLAMA_DIR"
     mkdir -p build
     cd build
-    if [[ $(uname -m) == 'arm64' ]]; then
-        echo "✓ Detected Apple Silicon - enabling Metal acceleration"
-        cmake .. -DGGML_METAL=ON
-    else
-        echo "✓ Building for Intel Mac"
-        cmake ..
+    
+    # Architecture-specific build
+    case "$ARCH" in
+        arm64)
+            echo "✓ Detected Apple Silicon - enabling Metal acceleration"
+            if ! cmake .. -DGGML_METAL=ON; then
+                echo ""
+                echo "❌ Build configuration failed!"
+                echo ""
+                echo "Try: xcode-select --install"
+                read -p "Press Enter to exit..."
+                exit 1
+            fi
+            ;;
+        x86_64)
+            echo "✓ Building for Intel Mac"
+            if ! cmake ..; then
+                echo ""
+                echo "❌ Build configuration failed!"
+                echo ""
+                echo "Try: xcode-select --install"
+                read -p "Press Enter to exit..."
+                exit 1
+            fi
+            ;;
+        *)
+            echo "⚠️  Building for unknown architecture: $ARCH"
+            if ! cmake ..; then
+                echo ""
+                echo "❌ Build configuration failed for $ARCH"
+                exit 1
+            fi
+            ;;
+    esac
+    
+    # Build with multiple cores
+    NUM_CORES=$(sysctl -n hw.ncpu 2>/dev/null || echo "4")
+    echo "   Using $NUM_CORES CPU cores..."
+    
+    if ! cmake --build . --config Release -j $NUM_CORES; then
+        echo ""
+        echo "❌ Build failed!"
+        echo ""
+        echo "Possible causes:"
+        echo "  • Missing Xcode Command Line Tools"
+        echo "  • Insufficient disk space"
+        echo ""
+        echo "Try running: xcode-select --install"
+        echo ""
+        read -p "Press Enter to exit..."
+        exit 1
     fi
-    cmake --build . --config Release
+    
     cd "$SCRIPT_DIR"
     
     if [ ! -f "$SERVER_BIN" ]; then
@@ -149,6 +225,7 @@ if [ ! -f "$SERVER_BIN" ]; then
         echo "Could not compile llama.cpp. Possible causes:"
         echo "  • Missing Xcode Command Line Tools"
         echo "  • Insufficient disk space"
+        echo "  • Architecture incompatibility ($ARCH)"
         echo ""
         echo "Try running: xcode-select --install"
         echo ""
@@ -156,6 +233,34 @@ if [ ! -f "$SERVER_BIN" ]; then
         exit 1
     fi
     echo "✓ Build complete!"
+fi
+
+# Verify binary is for correct architecture
+if command -v file &> /dev/null; then
+    if ! file "$SERVER_BIN" 2>/dev/null | grep -q "$ARCH"; then
+        echo ""
+        echo "⚠️  WARNING: Binary architecture mismatch!"
+        echo ""
+        echo "The llama-server binary was built for a different architecture."
+        echo "This happens when moving the USB drive between Intel and Apple Silicon Macs."
+        echo ""
+        echo "Current system: $ARCH"
+        echo "Binary info:"
+        file "$SERVER_BIN" 2>/dev/null
+        echo ""
+        echo "Rebuilding for your system..."
+        echo ""
+        
+        rm -rf "${LLAMA_DIR}/build"
+        chmod +x scripts/setup.sh
+        if ! ./scripts/setup.sh; then
+            echo ""
+            echo "❌ Rebuild failed!"
+            echo ""
+            read -p "Press Enter to exit..."
+            exit 1
+        fi
+    fi
 fi
 
 # Check if any model exists
@@ -230,6 +335,8 @@ fi
 
 echo ""
 echo "✅ All requirements met!"
+echo "   System: $ARCH"
+echo "   macOS: $OS_VERSION"
 echo ""
 echo "🚀 Starting DeepSeek..."
 echo ""
